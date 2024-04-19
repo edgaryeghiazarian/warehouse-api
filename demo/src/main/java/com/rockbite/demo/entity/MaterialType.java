@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.context.annotation.EnableLoadTimeWeaving;
 
+import java.util.Objects;
+
 @Entity
 @Table(name = "material_type")
 @Getter
@@ -23,5 +25,18 @@ public class MaterialType {
 
     public MaterialType() {
 
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MaterialType that = (MaterialType) o;
+        return maxCapacity == that.maxCapacity && Objects.equals(name, that.name) && Objects.equals(description, that.description) && Objects.equals(icon, that.icon);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, description, icon, maxCapacity);
     }
 }

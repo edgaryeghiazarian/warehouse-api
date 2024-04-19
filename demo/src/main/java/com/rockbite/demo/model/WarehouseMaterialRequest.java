@@ -5,7 +5,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class WarehouseMaterialJson {
+public class WarehouseMaterialRequest {
     private long warehouseId;
-    private long materialId;
+    private long materialTypeId;
+    private int quantity;
 }

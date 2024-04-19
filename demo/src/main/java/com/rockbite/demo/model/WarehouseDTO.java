@@ -20,7 +20,7 @@ public class WarehouseDTO {
         return "Warehouse{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", list of materials=" + materialDTOList +
+                ", list of materials=" + materialDTOList.toString() +
                 '}';
     }
 }

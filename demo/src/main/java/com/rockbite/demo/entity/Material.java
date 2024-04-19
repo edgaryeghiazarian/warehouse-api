@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Objects;
+
 @Entity
 @Table(name = "materials")
 @Getter
@@ -22,4 +24,12 @@ public class Material {
     private Warehouse warehouse;
 
     private int quantity;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Material material = (Material) o;
+        return Objects.equals(materialType, material.materialType) && Objects.equals(warehouse, material.warehouse);
+    }
 }
