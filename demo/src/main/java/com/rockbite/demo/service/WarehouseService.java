@@ -6,7 +6,6 @@ import com.rockbite.demo.entity.Warehouse;
 import com.rockbite.demo.exception.MaterialNotFoundException;
 import com.rockbite.demo.exception.MaterialTypeNotFoundException;
 import com.rockbite.demo.exception.WarehouseNotFoundException;
-import com.rockbite.demo.model.WarehouseRegistrationRequest;
 import com.rockbite.demo.repository.MaterialRepository;
 import com.rockbite.demo.repository.WarehouseRepository;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,39 +1,36 @@
 package com.rockbite.demo.controller;
 
-import com.rockbite.demo.converter.MaterialConverter;
-import com.rockbite.demo.converter.MaterialTypeConverter;
 import com.rockbite.demo.converter.WarehouseConverter;
 import com.rockbite.demo.entity.Warehouse;
 import com.rockbite.demo.exception.MaterialTypeNotFoundException;
 import com.rockbite.demo.model.MaterialTransferRequest;
 import com.rockbite.demo.model.WarehouseDTO;
-import com.rockbite.demo.service.MaterialService;
 import com.rockbite.demo.service.WarehouseService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/materials")
 public class MaterialController {
-    private final MaterialService materialService;
     private final WarehouseService warehouseService;
-    private final MaterialConverter materialConverter;
-    private final MaterialTypeConverter materialTypeConverter;
     private final WarehouseConverter warehouseConverter;
 
     @Autowired
-    public MaterialController(MaterialService materialService, WarehouseService warehouseService, MaterialConverter materialConverter, MaterialTypeConverter materialTypeConverter, WarehouseConverter warehouseConverter) {
-        this.materialService = materialService;
+    public MaterialController(WarehouseService warehouseService, WarehouseConverter warehouseConverter) {
         this.warehouseService = warehouseService;
-        this.materialConverter = materialConverter;
-        this.materialTypeConverter = materialTypeConverter;
         this.warehouseConverter = warehouseConverter;
     }
 
     @PostMapping("/transfer")
-    public ResponseEntity<?> transferMaterial(@RequestBody MaterialTransferRequest request) throws MaterialTypeNotFoundException {
+    public ResponseEntity<?> transferMaterial(@Valid @RequestBody MaterialTransferRequest request) throws MaterialTypeNotFoundException {
 
         Warehouse destWarehouse = warehouseService.transfer(
                 request.getSourceWarehouseId(),
@@ -45,19 +42,17 @@ public class MaterialController {
         return new ResponseEntity<>("Transferred:\n" + warehouseDTO.toString(), HttpStatus.OK);
     }
 
-    /*@PostMapping("/add/material")
-    public ResponseEntity<?> addMaterial(@RequestBody MaterialRegistrationRequest materialRegistry) throws MaterialTypeNotFoundException {
-        Material material = materialService.saveMaterial(materialRegistry);
-        MaterialDTO materialDTO = materialConverter.convertToModel(material, new MaterialDTO());
-
-        return new ResponseEntity<>(materialDTO, HttpStatus.CREATED);
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public Map<String, String> handleValidationExceptions(
+            MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+        return errors;
     }
-
-    @PostMapping("/add/materialtype")
-    public ResponseEntity<?> addMaterialType(@RequestBody MaterialType materialType) {
-        MaterialType newMaterialType = materialService.createMaterialType(materialType);
-        MaterialTypeDTO materialTypeDTO = materialTypeConverter.convertToModel(newMaterialType, new MaterialTypeDTO());
-        return new ResponseEntity<>(materialTypeDTO, HttpStatus.CREATED);
-    }*/
 
 }
