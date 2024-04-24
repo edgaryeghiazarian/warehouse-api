@@ -3,6 +3,7 @@ package com.rockbite.demo.service;
 import com.rockbite.demo.entity.Material;
 import com.rockbite.demo.entity.MaterialType;
 import com.rockbite.demo.entity.Warehouse;
+import com.rockbite.demo.exception.MaterialNotFoundException;
 import com.rockbite.demo.exception.MaterialTypeNotFoundException;
 import com.rockbite.demo.exception.WarehouseNotFoundException;
 import com.rockbite.demo.model.WarehouseRegistrationRequest;
@@ -60,7 +61,9 @@ public class WarehouseService {
             if (m.getMaterialType().equals(materialType)) {
                 int originalQuantity = m.getQuantity();
                 m.setQuantity(originalQuantity + quantity);
+                break;
             }
+
         }
         warehouse.setMaterials(materials);
         Warehouse updatedWarehouse = warehouseRepository.save(warehouse);
@@ -114,42 +117,58 @@ public class WarehouseService {
     }
 
     @Transactional
-    public Warehouse removeMaterialFromWarehouse(long warehouseId, long materialId) {
-        //todo corrections needed
+    public Warehouse removeMaterialFromWarehouse(long warehouseId, long materialTypeId, int quantity) throws MaterialTypeNotFoundException {
         Warehouse warehouse = getWarehouse(warehouseId);
         List<Material> materials = warehouse.getMaterials();
-        Material material = materialService.getMaterial(materialId);
+        MaterialType materialType = materialService.getMaterialType(materialTypeId);
 
-        for (Material local : materials) {
-            if (local.equals(material)) {
-                int quantity = local.getQuantity() - material.getQuantity();
-                local.setQuantity(quantity);
-                if (quantity < 0) {
-                    materials.remove(local);
+        for (Material localMaterial : materials) {
+            if (localMaterial.getMaterialType().equals(materialType)) {
+                int initialQuantity = localMaterial.getQuantity();
+                localMaterial.setQuantity(initialQuantity-quantity);
+                if (localMaterial.getQuantity() < 0) {
+                    localMaterial.setQuantity(0);
                 }
                 break;
             }
         }
+
         warehouse.setMaterials(materials);
         Warehouse updatedWarehouse = warehouseRepository.save(warehouse);
         return updatedWarehouse;
     }
 
-    public void transfer(Long sourceWarehouseId, Long destinationWarehouseId, Long materialId, int quantity) {
+    /**
+     * This method transfers materials from on warehouse to another.
+     * If source warehouse has less material quantity it will transfer the rest.
+     * If destination warehouse has less available capacity than the transfer amount,
+     * available amount for destination warehouse will be transferred from source warehouse,
+     * and same amount will be removed from source warehouse.
+     * */
+    @Transactional
+    public Warehouse transfer(Long sourceWarehouseId, Long destinationWarehouseId, Long materialTypeId, int quantity) throws MaterialTypeNotFoundException {
         Warehouse sourceWarehouse = getWarehouse(sourceWarehouseId);
         Warehouse destWarehouse = getWarehouse(destinationWarehouseId);
-        Material material = materialService.getMaterial(materialId);
+        MaterialType materialType = materialService.getMaterialType(materialTypeId);
 
-        Material sourceMaterial = sourceWarehouse.getMaterials().stream()
-                .filter(material1 -> material1.equals(material)).findAny().get();
+        Material sourceWHmaterial = sourceWarehouse.getMaterials().stream()
+                .filter(m -> m.getMaterialType().equals(materialType)).findFirst().orElseThrow(MaterialNotFoundException::new);
 
-        if (sourceMaterial.getQuantity() < quantity) {
-            throw new IllegalArgumentException("Insufficient amount of quantity");
+        if (sourceWHmaterial.getQuantity() < quantity) {
+            quantity = sourceWHmaterial.getQuantity();
         }
 
-        //todo not complete
+        Warehouse updatedDestWarehouse = null;
 
+        if (hasMaterial(destinationWarehouseId, materialTypeId)) {
+            int availableCapacity = availableCapacity(destWarehouse, materialType);
+            quantity = Math.min(availableCapacity, quantity);
+            updatedDestWarehouse = addMaterialQuantityToWarehouse(destinationWarehouseId, materialTypeId, quantity);
+        } else {
+            updatedDestWarehouse = addNewMaterialToWarehouse(destinationWarehouseId, materialTypeId, quantity);
+        }
+        removeMaterialFromWarehouse(sourceWarehouseId, materialTypeId, quantity);
 
-
+        return updatedDestWarehouse;
     }
 }

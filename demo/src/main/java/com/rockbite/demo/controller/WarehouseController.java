@@ -55,9 +55,8 @@ public class WarehouseController {
     }
 
     @PutMapping("/remove")
-    public ResponseEntity<?> removeMaterialFromWarehouse(@PathVariable long warehouseId, @PathVariable long materialId) {
-        //todo corrections needed
-        Warehouse warehouse = warehouseService.removeMaterialFromWarehouse(warehouseId, materialId);
+    public ResponseEntity<?> removeMaterialFromWarehouse(@RequestBody WarehouseMaterialRequest request) throws MaterialTypeNotFoundException {
+        Warehouse warehouse = warehouseService.removeMaterialFromWarehouse(request.getWarehouseId(), request.getMaterialTypeId(), request.getQuantity());
         WarehouseDTO warehouseDTO = warehouseConverter.convertToModel(warehouse, new WarehouseDTO());
 
         return new ResponseEntity<>("Material is removed from warehouse: " + warehouseDTO.toString(), HttpStatus.OK);

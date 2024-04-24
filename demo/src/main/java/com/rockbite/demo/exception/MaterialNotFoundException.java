@@ -9,4 +9,8 @@ public class MaterialNotFoundException extends RuntimeException {
     public MaterialNotFoundException(String message, Throwable cause) {
         super(message, cause);
     }
+
+    public MaterialNotFoundException() {
+
+    }
 }

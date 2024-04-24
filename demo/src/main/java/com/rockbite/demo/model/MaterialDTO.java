@@ -14,9 +14,9 @@ public class MaterialDTO {
 
     @Override
     public String toString() {
-        return "MaterialDTO{" +
+        return "Material{" +
                 "id=" + id +
-                ", materialTypeDTO=" + materialTypeDTO +
+                ", materialType=" + materialTypeDTO +
                 ", quantity=" + quantity +
                 '}';
     }

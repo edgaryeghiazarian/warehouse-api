@@ -12,7 +12,6 @@ public class WarehouseApplication {
 
 }
 
-//todo transfer
 //todo validation
 //todo exception handling
 //todo notification/observer pattern

@@ -2,12 +2,11 @@ package com.rockbite.demo.controller;
 
 import com.rockbite.demo.converter.MaterialConverter;
 import com.rockbite.demo.converter.MaterialTypeConverter;
-import com.rockbite.demo.entity.Material;
-import com.rockbite.demo.entity.MaterialType;
+import com.rockbite.demo.converter.WarehouseConverter;
+import com.rockbite.demo.entity.Warehouse;
 import com.rockbite.demo.exception.MaterialTypeNotFoundException;
-import com.rockbite.demo.model.MaterialDTO;
-import com.rockbite.demo.model.MaterialRegistrationRequest;
-import com.rockbite.demo.model.MaterialTypeDTO;
+import com.rockbite.demo.model.MaterialTransferRequest;
+import com.rockbite.demo.model.WarehouseDTO;
 import com.rockbite.demo.service.MaterialService;
 import com.rockbite.demo.service.WarehouseService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,24 +21,28 @@ public class MaterialController {
     private final WarehouseService warehouseService;
     private final MaterialConverter materialConverter;
     private final MaterialTypeConverter materialTypeConverter;
+    private final WarehouseConverter warehouseConverter;
 
     @Autowired
-    public MaterialController(MaterialService materialService, WarehouseService warehouseService, MaterialConverter materialConverter, MaterialTypeConverter materialTypeConverter) {
+    public MaterialController(MaterialService materialService, WarehouseService warehouseService, MaterialConverter materialConverter, MaterialTypeConverter materialTypeConverter, WarehouseConverter warehouseConverter) {
         this.materialService = materialService;
         this.warehouseService = warehouseService;
         this.materialConverter = materialConverter;
         this.materialTypeConverter = materialTypeConverter;
+        this.warehouseConverter = warehouseConverter;
     }
 
     @PostMapping("/transfer")
-    public ResponseEntity<?> transferMaterial(
-            @RequestParam Long sourceWarehouseId,
-            @RequestParam Long destinationWarehouseId,
-            @RequestParam Long materialId,
-            @RequestParam int quantity) {
+    public ResponseEntity<?> transferMaterial(@RequestBody MaterialTransferRequest request) throws MaterialTypeNotFoundException {
 
-        warehouseService.transfer(sourceWarehouseId, destinationWarehouseId, materialId, quantity);
-        return new ResponseEntity<>("Transferred", HttpStatus.OK);
+        Warehouse destWarehouse = warehouseService.transfer(
+                request.getSourceWarehouseId(),
+                request.getDestWarehouseId(),
+                request.getMaterialTypeId(),
+                request.getQuantity());
+
+        WarehouseDTO warehouseDTO = warehouseConverter.convertToModel(destWarehouse, new WarehouseDTO());
+        return new ResponseEntity<>("Transferred:\n" + warehouseDTO.toString(), HttpStatus.OK);
     }
 
     /*@PostMapping("/add/material")
