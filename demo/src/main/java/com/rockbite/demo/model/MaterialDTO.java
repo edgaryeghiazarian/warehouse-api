@@ -14,10 +14,10 @@ public class MaterialDTO {
 
     @Override
     public String toString() {
-        return "Material{" +
+        return "Material{\n" +
                 "id=" + id +
-                ", materialType=" + materialTypeDTO +
-                ", quantity=" + quantity +
+                "\nmaterialType=" + materialTypeDTO +
+                "\nquantity=" + quantity +
                 '}';
     }
 }

@@ -6,17 +6,21 @@ import com.rockbite.demo.entity.Warehouse;
 import com.rockbite.demo.exception.MaterialNotFoundException;
 import com.rockbite.demo.exception.MaterialTypeNotFoundException;
 import com.rockbite.demo.exception.WarehouseNotFoundException;
+import com.rockbite.demo.observer.WarehouseObserver;
+import com.rockbite.demo.observer.WarehouseSubject;
 import com.rockbite.demo.repository.MaterialRepository;
 import com.rockbite.demo.repository.WarehouseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-public class WarehouseService {
+public class WarehouseService implements WarehouseSubject {
+    private List<WarehouseObserver> observers = new ArrayList<>();
     private final WarehouseRepository warehouseRepository;
     private final MaterialService materialService;
 
@@ -60,6 +64,7 @@ public class WarehouseService {
             if (m.getMaterialType().equals(materialType)) {
                 int originalQuantity = m.getQuantity();
                 m.setQuantity(originalQuantity + quantity);
+                notifyObserver(m);
                 break;
             }
 
@@ -85,6 +90,7 @@ public class WarehouseService {
         Material material = materialService.saveMaterialInWarehouse(materialType, quantity, warehouse);
         materials.add(material);
         warehouse.setMaterials(materials);
+        notifyObserver(material);
         Warehouse updatedWarehouse = warehouseRepository.save(warehouse);
         return updatedWarehouse;
     }
@@ -128,6 +134,7 @@ public class WarehouseService {
                 if (localMaterial.getQuantity() < 0) {
                     localMaterial.setQuantity(0);
                 }
+                notifyObserver(localMaterial);
                 break;
             }
         }
@@ -167,7 +174,31 @@ public class WarehouseService {
             updatedDestWarehouse = addNewMaterialToWarehouse(destinationWarehouseId, materialTypeId, quantity);
         }
         removeMaterialFromWarehouse(sourceWarehouseId, materialTypeId, quantity);
-
+        notifyMaterialTransfer(materialType, sourceWarehouse.getName(), destWarehouse.getName(), quantity);
         return updatedDestWarehouse;
+    }
+
+    @Override
+    public void registerObserver(WarehouseObserver observer) {
+        observers.add(observer);
+    }
+
+    @Override
+    public void removeObserver(WarehouseObserver observer) {
+        observers.remove(observer);
+    }
+
+    @Override
+    public void notifyObserver(Material material) {
+        for (WarehouseObserver observer : observers) {
+            observer.update(material);
+        }
+    }
+
+    @Override
+    public void notifyMaterialTransfer(MaterialType materialType, String sourceWarehouse, String destinationWarehouse, int quantity) {
+        for (WarehouseObserver observer : observers) {
+            observer.updateMaterialTransfer(materialType, sourceWarehouse, destinationWarehouse, quantity);
+        }
     }
 }

@@ -25,12 +25,12 @@ public class MaterialTypeDTO {
 
     @Override
     public String toString() {
-        return "MaterialType{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", icon='" + icon + '\'' +
-                ", maxCapacity=" + maxCapacity +
+        return "MaterialType{\n" +
+                "id= " + id +
+                "\nname= " + name +
+                "\ndescription= " + description +
+                "\nicon= " + icon +
+                "\nmaxCapacity= " + maxCapacity +
                 '}';
     }
 }

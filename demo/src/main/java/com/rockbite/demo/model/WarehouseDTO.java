@@ -19,10 +19,10 @@ public class WarehouseDTO {
 
     @Override
     public String toString() {
-        return "Warehouse{" +
+        return "Warehouse{\n" +
                 "id=" + id +
-                ", name='" + name + '\'' +
-                ", list of materials=" + materialDTOList.toString() +
+                "\nname='" + name +
+                "\nlist of materials=" + materialDTOList.toString() +
                 '}';
     }
 }
