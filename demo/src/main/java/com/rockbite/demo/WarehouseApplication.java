@@ -11,7 +11,3 @@ public class WarehouseApplication {
 	}
 
 }
-
-//todo notification/observer pattern, finish implementation, fix observer adding logic
-//todo fix argument for update methods, print info
-//todo ensure every controller method works properly
