@@ -28,14 +28,12 @@ public class MaterialController {
     private final WarehouseService warehouseService;
     private final WarehouseConverter warehouseConverter;
     private final MaterialService materialService;
-    private final MaterialConverter materialConverter;
     private final MaterialTypeConverter materialTypeConverter;
     @Autowired
-    public MaterialController(WarehouseService warehouseService, WarehouseConverter warehouseConverter, MaterialService materialService, MaterialConverter materialConverter, MaterialTypeConverter materialTypeConverter) {
+    public MaterialController(WarehouseService warehouseService, WarehouseConverter warehouseConverter, MaterialService materialService, MaterialTypeConverter materialTypeConverter) {
         this.warehouseService = warehouseService;
         this.warehouseConverter = warehouseConverter;
         this.materialService = materialService;
-        this.materialConverter = materialConverter;
         this.materialTypeConverter = materialTypeConverter;
     }
 
